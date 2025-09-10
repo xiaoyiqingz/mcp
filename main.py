@@ -5,7 +5,7 @@
 """
 
 import asyncio
-from server import server_run
+from server import server_run_stream
 
 def main():
     """主函数：处理用户输入并返回带感叹号的内容"""
@@ -13,7 +13,8 @@ def main():
     print("请输入内容（按 Ctrl-C 退出）：")
     
     try:
-       server_run()
+       asyncio.run(server_run_stream())
+       #server_run()
             
     except KeyboardInterrupt:
         # 捕获 Ctrl-C 信号
