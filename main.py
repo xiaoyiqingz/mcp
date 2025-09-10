@@ -7,21 +7,23 @@
 import asyncio
 from server import server_run_stream
 
+
 def main():
     """主函数：处理用户输入并返回带感叹号的内容"""
     print("欢迎使用交互式客户端！")
     print("请输入内容（按 Ctrl-C 退出）：")
-    
+
     try:
-       asyncio.run(server_run_stream())
-       #server_run()
-            
+        asyncio.run(server_run_stream())
+        # asyncio.run(server_run())
+
     except KeyboardInterrupt:
         # 捕获 Ctrl-C 信号
         print("\n\n程序已退出，再见！")
     except EOFError:
         # 捕获 EOF 信号（某些终端环境）
         print("\n\n程序已退出，再见！")
+
 
 if __name__ == "__main__":
     main()

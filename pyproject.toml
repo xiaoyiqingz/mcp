@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "httpx[socks]>=0.28.1",
     "pydantic-ai>1.0.0",
     "python-dotenv>=1.1.1",
 ]
@@ -12,3 +13,4 @@ dependencies = [
 [tool.logfire]
 service_name="mcp-server"
 console = false
+send_to_logfire = true
