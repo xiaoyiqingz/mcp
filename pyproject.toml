@@ -8,3 +8,7 @@ dependencies = [
     "pydantic-ai>1.0.0",
     "python-dotenv>=1.1.1",
 ]
+
+[tool.logfire]
+service_name="mcp-server"
+console = false

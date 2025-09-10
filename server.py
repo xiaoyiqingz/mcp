@@ -1,5 +1,11 @@
 from anget import create_agent
 from datetime import datetime
+import logfire
+import os
+
+# 配置 logfire 将日志输出到文件而不是控制台
+logfire.configure()
+logfire.instrument_pydantic_ai()
 
 agent = create_agent()
 
