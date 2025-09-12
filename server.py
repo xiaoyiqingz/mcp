@@ -1,4 +1,6 @@
+import os
 from pydantic_ai import RunContext
+from pydantic_ai.mcp import MCPServerSSE
 from pydantic_ai.messages import ModelMessage
 from anget import create_agent
 from datetime import datetime
@@ -16,8 +18,12 @@ class Deps:
     client: AsyncClient
 
 
+mcpServer = MCPServerSSE(url=os.getenv("MCP_SERVER_URL"))
+
+
 agent = create_agent(
     deps_type=Deps,
+    toolsets=[mcpServer],
 )
 
 
