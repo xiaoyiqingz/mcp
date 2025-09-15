@@ -1,12 +1,12 @@
 import os
-from pydantic_ai import RunContext
+from pydantic_ai import Agent, RunContext
 from pydantic_ai.mcp import MCPServerSSE
 from pydantic_ai.messages import ModelMessage
-from anget import create_agent
 from datetime import datetime
 import logfire
 from httpx import AsyncClient
 from dataclasses import dataclass
+from models.ollama_qwen import model
 
 # 配置 logfire 将日志输出到文件而不是控制台
 logfire.configure()
@@ -18,13 +18,9 @@ class Deps:
     client: AsyncClient
 
 
-mcpServer = MCPServerSSE(url=os.getenv("MCP_SERVER_URL"))
-
-
-agent = create_agent(
-    deps_type=Deps,
-    toolsets=[mcpServer],
-)
+# mcpServer = MCPServerSSE(url=os.getenv("MCP_SERVER_URL"))
+# agent = Agent(model=model, deps_type=Deps, toolsets=[mcpServer])
+agent = Agent(model=model, deps_type=Deps)
 
 
 @agent.tool_plain
