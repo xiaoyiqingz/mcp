@@ -5,7 +5,7 @@ from pydantic_ai.providers.ollama import OllamaProvider
 
 load_dotenv()
 
-model_name = os.getenv("OLLAMA_MODEL", "deepseek-r1:7b")
+model_name = os.getenv("OLLAMA_MODEL_QWEN", "qwen3:8b")
 ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
 
 # 创建 provider
