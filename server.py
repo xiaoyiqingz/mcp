@@ -1,7 +1,14 @@
 import os
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.mcp import MCPServerSSE
-from pydantic_ai.messages import ModelMessage
+from pydantic_ai.messages import (
+    ModelMessage,
+    SystemPromptPart,
+    ThinkingPart,
+    ToolCallPart,
+    ToolReturnPart,
+    UserPromptPart,
+)
 from datetime import datetime
 import logfire
 from httpx import AsyncClient
@@ -20,7 +27,9 @@ class Deps:
 
 # mcpServer = MCPServerSSE(url=os.getenv("MCP_SERVER_URL"))
 # agent = Agent(model=model, deps_type=Deps, toolsets=[mcpServer])
-agent = Agent(model=model, deps_type=Deps)
+agent = Agent(
+    model=model, deps_type=Deps, instructions="你是一个助手，请根据用户输入返回结果"
+)
 
 
 @agent.tool_plain
@@ -51,6 +60,22 @@ async def server_run_stream():
             async with agent.run_stream(
                 user_input, deps=deps, message_history=all_messages
             ) as result:
+
+                for message in result.new_messages():
+                    for call in message.parts:
+                        if isinstance(call, ToolCallPart):
+                            print("调用tool：", call.tool_name)
+                        elif isinstance(call, ToolReturnPart):
+                            print("tool返回：", call.content)
+                        elif isinstance(call, SystemPromptPart):
+                            print("系统提示：", call.content)
+                        elif isinstance(call, UserPromptPart):
+                            print("用户输入：", call.content)
+                        elif isinstance(call, ThinkingPart):
+                            print("Tinking：", call.content)
+                        else:
+                            print(type(call))
+
                 async for message in result.stream_text(delta=True):
                     print(message, end="", flush=True)
                 print()  # 换行

@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.models.openai import OpenAIChatModel, OpenAIResponsesModelSettings
 from pydantic_ai.providers.ollama import OllamaProvider
 
 load_dotenv()
@@ -12,7 +12,12 @@ ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
 provider = OllamaProvider(base_url=ollama_base_url)
 
 # 创建 model
-model = OpenAIModel(
+model = OpenAIChatModel(
     model_name,
     provider=provider,
+)
+
+settings = OpenAIResponsesModelSettings(
+    openai_reasoning_effort="low",
+    openai_reasoning_summary="detailed",
 )
