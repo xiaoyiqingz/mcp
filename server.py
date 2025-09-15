@@ -1,4 +1,5 @@
 import os
+from typing import AsyncIterable
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.mcp import MCPServerSSE
 from pydantic_ai.messages import (
@@ -8,6 +9,14 @@ from pydantic_ai.messages import (
     ToolCallPart,
     ToolReturnPart,
     UserPromptPart,
+    AgentStreamEvent,
+    PartStartEvent,
+    PartDeltaEvent,
+    ThinkingPartDelta,
+    FunctionToolCallEvent,
+    FunctionToolResultEvent,
+    BuiltinToolCallEvent,
+    BuiltinToolResultEvent,
 )
 from datetime import datetime
 import logfire
@@ -44,6 +53,60 @@ async def get_weather(ctx: RunContext[Deps], city: str) -> str:
     return response.text
 
 
+async def event_stream_handler(
+    ctx: RunContext,
+    event_stream: AsyncIterable[AgentStreamEvent],
+):
+    """处理流式事件的处理器函数"""
+    # 流式处理事件
+    thinking_content = ""
+    thinking_started = False
+    text_started = False
+
+    async for event in event_stream:
+        if isinstance(event, PartStartEvent):
+            if isinstance(event.part, ThinkingPart):
+                thinking_started = True
+                thinking_content = event.part.content
+                print()  # 换行
+                print(f"🤔 Thinking：{thinking_content}", end="", flush=True)
+            # elif isinstance(event.part, ToolCallPart):
+            #     if thinking_started:
+            #         print()  # 换行
+            #         thinking_started = False
+            #     print(f"🔧 调用tool：{event.part.tool_name}")
+        elif isinstance(event, PartDeltaEvent):
+            if isinstance(event.delta, ThinkingPartDelta) and thinking_started:
+                if event.delta.content_delta:
+                    thinking_content += event.delta.content_delta
+                    print(event.delta.content_delta, end="", flush=True)
+        elif isinstance(event, FunctionToolCallEvent):
+            if thinking_started:
+                print()  # 换行
+                thinking_started = False
+            print(f"🔧 调用tool：{event.part.tool_name}")
+        elif isinstance(event, FunctionToolResultEvent):
+            if thinking_started:
+                print()  # 换行
+                thinking_started = False
+            print(f"📤 tool返回：{event.result.content}")
+        elif isinstance(event, BuiltinToolCallEvent):
+            if thinking_started:
+                print()  # 换行
+                thinking_started = False
+            print(f"🔧 调用内置tool：{event.part.tool_name}")
+        elif isinstance(event, BuiltinToolResultEvent):
+            if thinking_started:
+                print()  # 换行
+                thinking_started = False
+            print(f"📤 内置tool返回：{event.result.content}")
+
+    # 流式显示文本内容
+    if thinking_started:
+        print()  # 换行
+        thinking_started = False
+
+
 async def server_run_stream():
     all_messages: list[ModelMessage] = []
     message_history: list[ModelMessage] | None = None
@@ -58,9 +121,13 @@ async def server_run_stream():
 
             # 在用户输入后加上"！"并返回
             async with agent.run_stream(
-                user_input, deps=deps, message_history=all_messages
+                user_input,
+                deps=deps,
+                message_history=all_messages,
+                event_stream_handler=event_stream_handler,
             ) as result:
 
+                # 处理历史消息
                 for message in result.new_messages():
                     for call in message.parts:
                         if isinstance(call, ToolCallPart):
@@ -72,10 +139,13 @@ async def server_run_stream():
                         elif isinstance(call, UserPromptPart):
                             print("用户输入：", call.content)
                         elif isinstance(call, ThinkingPart):
-                            print("Tinking：", call.content)
+                            # 什么也不做，因为已经在 event_stream_handler 中处理了，此处打印只会在Think全部完成后打印内容，太慢
+                            pass
                         else:
                             print(type(call))
 
+                print("================")
+                """ 流式显示文本内容 """
                 async for message in result.stream_text(delta=True):
                     print(message, end="", flush=True)
                 print()  # 换行
