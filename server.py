@@ -1,7 +1,5 @@
-import os
 from typing import AsyncIterable
 from pydantic_ai import Agent, RunContext
-from pydantic_ai.mcp import MCPServerSSE
 from pydantic_ai.messages import (
     ModelMessage,
     SystemPromptPart,
@@ -23,6 +21,7 @@ import logfire
 from httpx import AsyncClient
 from dataclasses import dataclass
 from models.ollama_qwen import model
+from tools.code_reader import read_file_lines
 
 # 配置 logfire 将日志输出到文件而不是控制台
 logfire.configure()
@@ -37,7 +36,9 @@ class Deps:
 # mcpServer = MCPServerSSE(url=os.getenv("MCP_SERVER_URL"))
 # agent = Agent(model=model, deps_type=Deps, toolsets=[mcpServer])
 agent = Agent(
-    model=model, deps_type=Deps, instructions="你是一个助手，请根据用户输入返回结果"
+    model=model,
+    deps_type=Deps,
+    system_prompt="你是一个代码编程高手，请严格遵守python代码规范，并给出详细的代码注释",  # 可以通过添加 /no_think 来禁用思考
 )
 
 
@@ -51,6 +52,13 @@ async def get_weather(ctx: RunContext[Deps], city: str) -> str:
     url = f"http://wttr.in/{city}?format=3"
     response = await ctx.deps.client.get(url)
     return response.text
+
+
+@agent.tool
+async def read_code_file(
+    ctx: RunContext[Deps], file_path: str, start_line: int, end_line: int
+) -> str:
+    return read_file_lines(file_path, start_line, end_line)
 
 
 async def event_stream_handler(
@@ -68,8 +76,9 @@ async def event_stream_handler(
             if isinstance(event.part, ThinkingPart):
                 thinking_started = True
                 thinking_content = event.part.content
-                print()  # 换行
-                print(f"🤔 Thinking：{thinking_content}", end="", flush=True)
+                if thinking_content.strip():  # 只有当thinking_content有内容时才输出
+                    print()  # 换行
+                    print(f"🤔 Thinking：{thinking_content}", end="", flush=True)
             # elif isinstance(event.part, ToolCallPart):
             #     if thinking_started:
             #         print()  # 换行
@@ -109,7 +118,7 @@ async def event_stream_handler(
 
 async def server_run_stream():
     all_messages: list[ModelMessage] = []
-    message_history: list[ModelMessage] | None = None
+    # message_history: list[ModelMessage] | None = None
 
     async with AsyncClient() as client:
         logfire.instrument_httpx(client, capture_all=True)
@@ -118,6 +127,9 @@ async def server_run_stream():
         while True:
             # 等待用户输入
             user_input = input("> ")
+
+            if user_input == "exit":
+                break
 
             # 在用户输入后加上"！"并返回
             async with agent.run_stream(
