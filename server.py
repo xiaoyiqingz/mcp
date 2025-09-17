@@ -22,6 +22,7 @@ from httpx import AsyncClient
 from dataclasses import dataclass
 from models.ollama_qwen import model
 from tools.code_reader import read_file_lines
+from commands.builtin_commands import process_builtin_command, CommandType
 
 # 配置 logfire 将日志输出到文件而不是控制台
 logfire.configure()
@@ -69,16 +70,14 @@ async def event_stream_handler(
     # 流式处理事件
     thinking_content = ""
     thinking_started = False
-    text_started = False
 
     async for event in event_stream:
         if isinstance(event, PartStartEvent):
             if isinstance(event.part, ThinkingPart):
                 thinking_started = True
                 thinking_content = event.part.content
-                if thinking_content.strip():  # 只有当thinking_content有内容时才输出
-                    print()  # 换行
-                    print(f"🤔 Thinking：{thinking_content}", end="", flush=True)
+                print()  # 换行
+                print(f"🤔 Thinking：{thinking_content}", end="", flush=True)
             # elif isinstance(event.part, ToolCallPart):
             #     if thinking_started:
             #         print()  # 换行
@@ -128,8 +127,17 @@ async def server_run_stream():
             # 等待用户输入
             user_input = input("> ")
 
-            if user_input == "exit":
-                break
+            # 处理内置命令
+            is_builtin, result, command_type = process_builtin_command(user_input)
+            if is_builtin:
+                if command_type == CommandType.DIRECT:
+                    # 直接处理型命令：显示结果并等待用户继续输入
+                    if result is not None:
+                        print(result)
+                    continue
+                elif command_type == CommandType.CONVERT:
+                    # 转换型命令：将转换后的内容作为用户输入传给 agent
+                    user_input = result
 
             # 在用户输入后加上"！"并返回
             async with agent.run_stream(

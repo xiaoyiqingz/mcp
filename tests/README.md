@@ -87,7 +87,7 @@ python3 -m unittest tests.test_code_reader.TestCodeReader.test_read_single_line
 
 ```python
 import unittest
-from tools.your_module import your_function
+from commands.your_module import your_function
 
 class TestYourModule(unittest.TestCase):
     def test_your_function(self):

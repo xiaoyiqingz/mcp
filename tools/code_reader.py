@@ -49,7 +49,7 @@ def read_file_lines(file_path: str, start_line: int, end_line: int = None) -> st
         selected_lines = lines[start_idx:end_idx]
         return "".join(selected_lines)
 
-    except (FileNotFoundError, ValueError) as e:
+    except (FileNotFoundError, ValueError):
         # 重新抛出已知的异常类型
         raise
     except Exception as e:
