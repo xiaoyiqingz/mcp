@@ -21,6 +21,7 @@ import logfire
 from httpx import AsyncClient
 from dataclasses import dataclass
 from models.ollama_qwen import model
+from tools.code_patcher import apply_patch
 from tools.code_reader import read_file_lines
 from commands.builtin_commands import process_builtin_command, CommandType
 
@@ -60,6 +61,13 @@ async def read_code_file(
     ctx: RunContext[Deps], file_path: str, start_line: int, end_line: int
 ) -> str:
     return read_file_lines(file_path, start_line, end_line)
+
+
+@agent.tool
+async def apply_code_patch(
+    ctx: RunContext[Deps], file_path: str, patch_string: str
+) -> str:
+    return apply_patch(patch_string, file_path)
 
 
 async def event_stream_handler(
@@ -164,7 +172,7 @@ async def server_run_stream():
                         else:
                             print(type(call))
 
-                print("================")
+                print("\n================\n")
                 """ 流式显示文本内容 """
                 async for message in result.stream_text(delta=True):
                     print(message, end="", flush=True)
