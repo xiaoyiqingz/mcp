@@ -73,7 +73,7 @@ async def apply_code_patch(
 
 
 @agent.tool
-async def modify_code(ctx: RunContext[Deps], code_string: str) -> str:
+async def check_and_modify_code(ctx: RunContext[Deps], code_string: str) -> str:
     return await modify(code_string)
 
 
