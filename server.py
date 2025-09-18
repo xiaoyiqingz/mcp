@@ -20,7 +20,9 @@ from datetime import datetime
 import logfire
 from httpx import AsyncClient
 from dataclasses import dataclass
+from tools.coder import generate, modify
 from models.ollama_qwen import model
+from prompts.prompt import get_common_prompt
 from tools.code_patcher import apply_patch
 from tools.code_reader import read_file_lines
 from commands.builtin_commands import process_builtin_command, CommandType
@@ -40,7 +42,7 @@ class Deps:
 agent = Agent(
     model=model,
     deps_type=Deps,
-    system_prompt="你是一个代码编程高手，请严格遵守python代码规范，并给出详细的代码注释",  # 可以通过添加 /no_think 来禁用思考
+    system_prompt=get_common_prompt(),
 )
 
 
@@ -68,6 +70,16 @@ async def apply_code_patch(
     ctx: RunContext[Deps], file_path: str, patch_string: str
 ) -> str:
     return apply_patch(patch_string, file_path)
+
+
+@agent.tool
+async def modify_code(ctx: RunContext[Deps], code_string: str) -> str:
+    return await modify(code_string)
+
+
+@agent.tool
+async def generate_code(ctx: RunContext[Deps], text: str) -> str:
+    return await generate(text)
 
 
 async def event_stream_handler(

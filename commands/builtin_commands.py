@@ -7,8 +7,7 @@
 """
 
 import sys
-from datetime import datetime
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 from enum import Enum
 
 
@@ -75,12 +74,12 @@ def _handle_exit() -> Tuple[bool, None]:
 
 def _convert_time() -> Tuple[bool, str]:
     """转换时间查询命令为用户输入"""
-    return True, f"请告诉我当前时间是"
+    return True, "请告诉我当前时间是"
 
 
 def _convert_date() -> Tuple[bool, str]:
     """转换日期查询命令为用户输入"""
-    return True, f"请告诉我今天的日期是"
+    return True, "请告诉我今天的日期是"
 
 
 def _convert_weather() -> Tuple[bool, str]:

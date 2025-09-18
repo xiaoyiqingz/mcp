@@ -1,6 +1,6 @@
 import re
 import os
-from typing import List, Tuple, Optional
+from typing import List
 
 
 def apply_patch(patch_string: str, file_path: str, backup: bool = True) -> bool:
@@ -15,6 +15,8 @@ def apply_patch(patch_string: str, file_path: str, backup: bool = True) -> bool:
     Returns:
         bool: True if patch was applied successfully, False otherwise
     """
+    # print(f"Applying patch to {file_path}")
+    # print(f"Patch string: {patch_string}")
     try:
         # Parse the patch
         hunks = _parse_patch(patch_string)
@@ -201,18 +203,22 @@ def test_patch_functionality():
     Test the patch functionality with the example from the user query.
     """
     # Create test files
-    test_file = "test_file.txt"
-    patch_content = """--- file1.txt
-+++ file2.txt
-@@ -1 +1 @@
--Hello World
-+Hello Universe"""
+    test_file = "./info.py"
+    patch_content = """--- info.py     2025-09-18 20:47:45
++++ info1.py    2025-09-17 23:25:48
+@@ -11,9 +11,9 @@
+ def get_current_info() -> Dict[str, str]:
+     now = datetime.datetime.now()
+     return {
+-        "time": now.strftime("%Y-%m-%d %H:%M:%S"),
++        "time": now.strftime("%Y-%m-%d %H:%M:%S"),  # 当前时间
+         "date": now.strftime("%Y年%m月%d日"),
+-        "weekday": now.strftime("%A"),
++        "weekday": now.strftime("%A"),  # 当前星期
+         "timestamp": str(int(now.timestamp())),
+     }"""
 
-    # Create original file
-    with open(test_file, "w") as f:
-        f.write("Hello World\n")
-
-    print(f"Original file content:")
+    print("Original file content:")
     with open(test_file, "r") as f:
         print(f.read())
 
@@ -220,15 +226,15 @@ def test_patch_functionality():
     success = apply_patch(patch_content, test_file)
     print(f"\nPatch applied successfully: {success}")
 
-    print(f"\nPatched file content:")
+    print("\nPatched file content:")
     with open(test_file, "r") as f:
         print(f.read())
 
     # Clean up
-    if os.path.exists(test_file):
-        os.remove(test_file)
-    if os.path.exists(test_file + ".orig"):
-        os.remove(test_file + ".orig")
+    # if os.path.exists(test_file):
+    #     os.remove(test_file)
+    # if os.path.exists(test_file + ".orig"):
+    #     os.remove(test_file + ".orig")
 
 
 if __name__ == "__main__":
