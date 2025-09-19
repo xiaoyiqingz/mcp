@@ -15,7 +15,7 @@ def get_common_prompt():
 [tools]
 - get_current_time: 返回当前时间信息
 - get_weather: 返回用户当前天气信息
-- check_and_modify_code: 根据给定的代码片段，代码文件路径，以及开始行数，判断是否有误或需要改进，并给出修改后的代码
+- check_and_modify_code: 根据给定的代码片段，这段代码文件路径，以及代码开始的行号，判断是否有误或需要改进，并给出修改后的代码
 - generate_code: 生成代码，并给出详细的代码注释
 - read_code_file: 读取代码文件，并返回代码内容
 - apply_code_patch: 将generate_code或modify_code的结果，将代码写入指定文件中
