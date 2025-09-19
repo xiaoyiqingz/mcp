@@ -9,10 +9,8 @@ agent = Agent(
 )
 
 
-async def modify(prompt: str) -> str:
-    prompt = (
-        f"请帮我查看一下这段代买是否有错误, 如果有请修改, 并给出修改后的代码: {prompt}"
-    )
+async def modify(prompt: str, file_path: str, begin_line: int = 1) -> str:
+    prompt = f"这段代码是从文件{file_path}中低{begin_line}行开始读取的, 请帮我查看一下这段代买是否有错误, 如果有请修改, 并给出修改后的代码: {prompt}"
     result = await agent.run(prompt)
     return result.output
 

@@ -22,6 +22,7 @@ from httpx import AsyncClient
 from dataclasses import dataclass
 from tools.coder import generate, modify
 from models.qwen import model_qwen
+from models.deepseek import model_deepseek
 from prompts.prompt import get_common_prompt
 from tools.code_patcher import apply_patch
 from tools.code_reader import read_file_lines
@@ -73,8 +74,10 @@ async def apply_code_patch(
 
 
 @agent.tool
-async def check_and_modify_code(ctx: RunContext[Deps], code_string: str) -> str:
-    return await modify(code_string)
+async def check_and_modify_code(
+    ctx: RunContext[Deps], code_string: str, file_path: str, begin_line: int = 1
+) -> str:
+    return await modify(code_string, file_path, begin_line)
 
 
 @agent.tool
