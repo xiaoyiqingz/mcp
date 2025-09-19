@@ -36,10 +36,10 @@ def read_file_lines(file_path: str, start_line: int, end_line: int = None) -> st
         # 验证行号是否超出文件范围
         total_lines = len(lines)
         if start_line > total_lines:
-            raise ValueError(f"起始行号 {start_line} 超出文件总行数 {total_lines}")
+            start_line = total_lines - 1
 
         if end_line is not None and end_line > total_lines:
-            raise ValueError(f"结束行号 {end_line} 超出文件总行数 {total_lines}")
+            end_line = total_lines
 
         # 提取指定行数（转换为0基索引）
         start_idx = start_line - 1

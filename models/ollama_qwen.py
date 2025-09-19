@@ -9,12 +9,12 @@ model_name = os.getenv("OLLAMA_MODEL_QWEN", "qwen3:8b")
 ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
 
 # 创建 model
-model = OpenAIChatModel(
+model_ollama_qwen = OpenAIChatModel(
     model_name,
     provider=OllamaProvider(base_url=ollama_base_url),
 )
 
-model1 = OpenAIChatModel(
+model_ollama_qwen_s = OpenAIChatModel(
     model_name,
     provider=OllamaProvider(base_url=ollama_base_url),
 )

@@ -1,10 +1,10 @@
 from pydantic_ai import Agent
-from models.ollama_qwen import model1
+from models.qwen import model_qwen
 from prompts.prompt import get_coder_prompt
 
 
 agent = Agent(
-    model=model1,
+    model=model_qwen,
     system_prompt=get_coder_prompt(),
 )
 

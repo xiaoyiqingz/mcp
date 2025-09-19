@@ -21,7 +21,7 @@ import logfire
 from httpx import AsyncClient
 from dataclasses import dataclass
 from tools.coder import generate, modify
-from models.ollama_qwen import model
+from models.qwen import model_qwen
 from prompts.prompt import get_common_prompt
 from tools.code_patcher import apply_patch
 from tools.code_reader import read_file_lines
@@ -40,7 +40,7 @@ class Deps:
 # mcpServer = MCPServerSSE(url=os.getenv("MCP_SERVER_URL"))
 # agent = Agent(model=model, deps_type=Deps, toolsets=[mcpServer])
 agent = Agent(
-    model=model,
+    model=model_qwen,
     deps_type=Deps,
     system_prompt=get_common_prompt(),
 )
